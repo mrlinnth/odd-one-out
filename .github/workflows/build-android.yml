@@ -1,0 +1,59 @@
+# Builds an Android APK using EAS Build local mode and uploads it as a workflow artifact.
+#
+# Prerequisites:
+#   Add EXPO_TOKEN as a repository secret:
+#   GitHub repo → Settings → Secrets and variables → Actions → New repository secret
+#   Name: EXPO_TOKEN
+#   Value: your EAS personal access token (expo.dev → Account → Access Tokens)
+
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: EAS local build (Android APK)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build APK (EAS local)
+        run: |
+          mkdir -p ./build-output
+          eas build \
+            --platform android \
+            --profile preview \
+            --local \
+            --non-interactive \
+            --output ./build-output/app.apk
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: ./build-output/app.apk
