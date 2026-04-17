@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Don't Tap the Fruit",
+    "slug": "odd-one-out",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "odd-one-out",
+    "platforms": ["android"],
+    "newArchEnabled": true,
+    "android": {
+      "minSdkVersion": 30,
+      "targetSdkVersion": 36
+    }
+  }
+}
