@@ -70,3 +70,11 @@ Do not delete old entries. This file is append-only.
 - Playtest gate criteria: smooth scrolling (60fps), emojis render correctly (no tofu squares), MMKV `highScore` persists across app restart.
 - Do NOT start Slice 2 until these three criteria pass.
 
+## 2026-04-17 — react-dom override fix
+
+- EAS Cloud Build failed on `npm ci` due to `react-dom@19.2.5` peer dep vs `react@19.1.0`.
+- Root cause: `expo-router` and `@expo/metro-runtime` declare `react-dom` as `peerOptional` with no version constraint. npm resolved to latest (19.2.5), incompatible with React 19.1.
+- Fix: added `"overrides": { "react-dom": "19.1.0" }` to `package.json`. Lockfile regenerated clean.
+- Pins verified after reinstall: reanimated 3.17.5, mmkv 3.3.3.
+- Ready to retry EAS build.
+
