@@ -2,7 +2,7 @@
 
 Read this file before touching any file in this repo. All constraints apply to every file you create or modify. If a task requires deviating from anything here, stop and ask before proceeding.
 
-Read docs/CONSTRAINTS.md, docs/V1-SCOPE.md, docs/IMPLEMENTATION-PLAN.md, and docs/SESSION-LOG.md (especially recent entries) before starting. Pull latest from main. Append a new entry to SESSION-LOG.md at the end of the session summarizing what you did.
+Read docs/CONSTRAINTS.md, docs/V1-SCOPE.md, docs/IMPLEMENTATION-PLAN.md, docs/BRAND.md, and docs/SESSION-LOG.md (especially recent entries) before starting. Pull latest from main. Append a new entry to SESSION-LOG.md at the end of the session summarizing what you did.
 
 Full details live in `docs/CONSTRAINTS.md` and `docs/V1-SCOPE.md`. This file is the distilled working reference.
 
