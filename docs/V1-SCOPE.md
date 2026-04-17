@@ -87,7 +87,7 @@ Exact emoji list to be finalized in implementation — curate for maximum visual
 ### 1. Splash / Start screen (`src/app/index.tsx`)
 
 - Full screen, light background.
-- Game title: "Don't Tap the Fruit" or similar (final name TBD — placeholder for now).
+- Game title: "Odd One Out".
 - Tagline: single line of emoji showing the mechanic, e.g. "🍎🍎🐶🍎".
 - "Tap to Start" prompt, pulsing.
 - Current high score displayed below (or "No high score yet" on first launch).

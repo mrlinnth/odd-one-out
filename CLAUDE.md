@@ -10,7 +10,7 @@ Full details live in `docs/CONSTRAINTS.md` and `docs/V1-SCOPE.md`. This file is 
 
 ## Project
 
-"Don't Tap the Fruit" — a single-player, offline, portrait-only Android game built with Expo SDK 54. A 4-column grid of emoji tiles scrolls upward. Each row has 3 "common" emoji and 1 "target" emoji (the odd-one-out). Tap the target before it leaves the screen. Tapping a wrong tile or missing the target ends the game. Score scales with speed. High score is persisted locally via MMKV.
+"Odd One Out" — a single-player, offline, portrait-only Android game built with Expo SDK 54. A 4-column grid of emoji tiles scrolls upward. Each row has 3 "common" emoji and 1 "target" emoji (the odd-one-out). Tap the target before it leaves the screen. Tapping a wrong tile or missing the target ends the game. Score scales with speed. High score is persisted locally via MMKV.
 
 ---
 
