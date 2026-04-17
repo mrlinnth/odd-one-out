@@ -5,11 +5,19 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "odd-one-out",
-    "platforms": ["android"],
+    "platforms": [
+      "android"
+    ],
     "newArchEnabled": true,
     "android": {
       "minSdkVersion": 30,
-      "targetSdkVersion": 36
+      "targetSdkVersion": 36,
+      "package": "xyz.hiyan.oddoneout"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6f205b37-026f-4218-825a-56f5da1ed86c"
+      }
     }
   }
 }
