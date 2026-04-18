@@ -1,16 +1,18 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { MMKV } from 'react-native-mmkv';
+import * as SecureStore from 'expo-secure-store';
 import { BASE_SPEED } from '../lib/gameConfig';
 import type { GameStatus, Row } from '../types';
 
-const storage = new MMKV();
+const HIGH_SCORE_KEY = 'high_score';
 
-const mmkvStorage = {
-  getItem: (name: string): string | null => storage.getString(name) ?? null,
-  setItem: (name: string, value: string): void => { storage.set(name, value); },
-  removeItem: (name: string): void => { storage.delete(name); },
-};
+function loadHighScore(): number {
+  const val = SecureStore.getItem(HIGH_SCORE_KEY);
+  return val !== null ? parseInt(val, 10) : 0;
+}
+
+export function saveHighScore(score: number): void {
+  SecureStore.setItem(HIGH_SCORE_KEY, String(score));
+}
 
 interface GameState {
   status: GameStatus;
@@ -30,30 +32,21 @@ interface GameActions {
 
 type GameStore = GameState & GameActions;
 
-export const useGameStore = create<GameStore>()(
-  persist(
-    (set) => ({
-      status: 'idle',
-      score: 0,
-      highScore: 0,
-      currentSpeed: BASE_SPEED,
-      commonCategory: 'fruits',
-      targetCategory: 'animals',
-      rows: [],
-      lastCategoryRotationScore: 0,
+export const useGameStore = create<GameStore>()((set) => ({
+  status: 'idle',
+  score: 0,
+  highScore: loadHighScore(),
+  currentSpeed: BASE_SPEED,
+  commonCategory: 'fruits',
+  targetCategory: 'animals',
+  rows: [],
+  lastCategoryRotationScore: 0,
 
-      startGame: (): void => {
-        set({ status: 'playing', score: 0, rows: [], currentSpeed: BASE_SPEED, lastCategoryRotationScore: 0 });
-      },
+  startGame: (): void => {
+    set({ status: 'playing', score: 0, rows: [], currentSpeed: BASE_SPEED, lastCategoryRotationScore: 0 });
+  },
 
-      resetGame: (): void => {
-        set({ status: 'idle', score: 0, rows: [], currentSpeed: BASE_SPEED, lastCategoryRotationScore: 0 });
-      },
-    }),
-    {
-      name: 'game-high-score',
-      storage: createJSONStorage(() => mmkvStorage),
-      partialize: (state): Pick<GameState, 'highScore'> => ({ highScore: state.highScore }),
-    },
-  ),
-);
+  resetGame: (): void => {
+    set({ status: 'idle', score: 0, rows: [], currentSpeed: BASE_SPEED, lastCategoryRotationScore: 0 });
+  },
+}));
