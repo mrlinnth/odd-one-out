@@ -71,6 +71,97 @@ Watch the grid scroll for ~60 seconds. Check:
 
 ---
 
+## Slice 1.5 — Stack Migration (insert after Slice 1 in IMPLEMENTATION-PLAN.md)
+
+**Goal**: Fix the broken Slice 1 build by migrating to the updated stack. Remove NativeWind + Tailwind, upgrade Reanimated to v4, add react-native-worklets, replace MMKV with expo-secure-store, convert all `className` usage to `StyleSheet.create`. End with a successful EAS build and the same playtest gate as Slice 1.
+
+**What "done" looks like**: The app builds via EAS, installs on the Pixel 6, and shows the same scrolling emoji grid from Slice 1. High score persists across app restart via expo-secure-store. No crashes, no red/yellow screens.
+
+### Tasks
+
+1. Read `docs/CONSTRAINTS.md` (updated 2026-04-18) to understand the new stack.
+2. Remove NativeWind and Tailwind:
+   - `npm uninstall nativewind tailwindcss`
+   - Delete `tailwind.config.js` if it exists.
+   - Remove any NativeWind-related config from `babel.config.js`, `metro.config.js`, and `app.json`/`app.config.ts`.
+   - Remove any `/// <reference types="nativewind/types" />` from declaration files.
+3. Remove MMKV:
+   - `npm uninstall react-native-mmkv`
+   - Delete any MMKV import/usage in `src/stores/gameStore.ts` and anywhere else.
+4. Upgrade Reanimated and install worklets:
+   - `npx expo install react-native-reanimated react-native-worklets`
+   - Verify `package.json` shows `react-native-reanimated` at `~4.3.x` and `react-native-worklets` at `~0.8.x`.
+   - Update `babel.config.js`: replace `react-native-reanimated/plugin` with `react-native-worklets/plugin` in the plugins array.
+5. Install expo-secure-store (if not already present — it's bundled with Expo SDK 54 but may need explicit install):
+   - `npx expo install expo-secure-store`
+6. Create `src/lib/colors.ts` — export the brand palette from BRAND.md as a typed constant object.
+7. Convert all `className` props in existing components to `StyleSheet.create` styles using the colors from `colors.ts`. Components to check:
+   - `src/components/Tile.tsx`
+   - `src/components/TileGrid.tsx`
+   - `src/app/index.tsx`
+   - `src/app/_layout.tsx`
+   - Any other files that use `className`.
+8. Update `src/stores/gameStore.ts`:
+   - Remove MMKV persist middleware.
+   - Add `loadHighScore()` and `saveHighScore(score)` functions that use `expo-secure-store` (`getItem` / `setItem` — sync API is fine for a single integer).
+   - Call `loadHighScore()` on store initialization.
+9. Run `npx expo prebuild --clean` to regenerate native projects with the new dependencies.
+10. Verify no TypeScript errors: `npx tsc --noEmit`.
+11. Check that the `react-dom` override in `package.json` is still present (was added in a prior session to fix a peer dep conflict).
+
+### Deploy
+
+```
+npx expo prebuild --clean
+eas build --platform android --profile development
+```
+
+Install on Pixel 6.
+
+### Playtest gate
+
+Same criteria as Slice 1:
+- Scrolling is smooth (60fps, no hitching).
+- Emojis render correctly (no tofu squares).
+- High score persists across app restart (set a test value via SecureStore, restart, verify it's still there).
+- No crashes, no red-screen errors, no yellow-box warnings.
+
+**Stop and fix before Slice 2 if**: build fails, scrolling stutters, or persistence doesn't work. These are the same foundation problems from Slice 1 — they must pass before moving on.
+
+### Commit
+
+`fix: migrate stack — drop NativeWind/MMKV, upgrade Reanimated v4, add expo-secure-store`
+
+---
+
+# Claude Code Handoff Prompt for Slice 1.5
+
+Paste this into Claude Code to start the migration session:
+
+---
+
+Read these docs before starting, in this order:
+1. `docs/CONSTRAINTS.md` — the stack has changed since Slice 1. Read the Migration Notes section carefully.
+2. `docs/BRAND.md` — updated to remove Tailwind config, now uses `src/lib/colors.ts` pattern.
+3. `docs/IMPLEMENTATION-PLAN.md` — find the "Slice 1.5" section and work only on those tasks.
+4. `docs/SESSION-LOG.md` — read the latest entries so you know what happened in prior sessions.
+
+Context: Slice 1 code exists but the build is broken. Reanimated v3 doesn't compile on RN 0.81. We're migrating the stack:
+- Remove NativeWind + Tailwind (replaced with StyleSheet.create)
+- Remove react-native-mmkv (replaced with expo-secure-store)
+- Upgrade react-native-reanimated to ~4.3.0 (was pinned to v3)
+- Add react-native-worklets ~0.8.1 (new Reanimated v4 peer dep)
+- Create src/lib/colors.ts with the brand palette
+- Convert all className usage to StyleSheet.create
+
+Do NOT run `npx expo install --fix` without checking what it changes.
+Do NOT add any packages not listed in CONSTRAINTS.md.
+Do NOT modify game logic — this is a dependency migration only.
+
+After completing all tasks, append a session entry to `docs/SESSION-LOG.md` summarizing what was done.
+
+---
+
 ## Slice 2 — Playable Core Loop
 
 **Goal**: The game is actually playable. You can tap target tiles, wrong taps end the game, missed targets end the game, score counts up. No screens other than the game screen itself. No high score display yet. No haptics yet.
