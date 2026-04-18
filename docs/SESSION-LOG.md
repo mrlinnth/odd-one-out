@@ -78,3 +78,18 @@ Do not delete old entries. This file is append-only.
 - Pins verified after reinstall: reanimated 3.17.5, mmkv 3.3.3.
 - Ready to retry EAS build.
 
+## 2026-04-18 — Stack migration planning (claude.ai)
+
+- Diagnosed the root cause of the Slice 1 build failure: three-way deadlock between NativeWind 4.1 (needs Reanimated v3), RN 0.81 (needs Reanimated v4), and Reanimated v3 (doesn't compile on RN 0.81).
+- Decision: drop NativeWind entirely, use StyleSheet.create. No NativeWind v5 (pre-release, violates 6-month rule).
+- Researched current stable versions:
+  - react-native-reanimated 4.3.0 (supports RN 0.81, latest stable)
+  - react-native-worklets 0.8.1 (required peer dep for Reanimated v4)
+  - react-native-mmkv 4.3.1 + react-native-nitro-modules 0.35.4 (the Jan 2026 build issues are resolved but the dep chain is complex)
+- Decision: drop MMKV entirely. We persist one integer (high score). Using expo-secure-store instead — zero extra native deps, bundled with Expo SDK 54.
+- Updated `docs/CONSTRAINTS.md` with new stack, migration notes, and rationale.
+- Updated `docs/BRAND.md` to replace Tailwind config with `src/lib/colors.ts` pattern.
+- Wrote Slice 1.5 tasks and Claude Code handoff prompt for the migration session.
+- Next step: run Slice 1.5 in Claude Code to perform the actual migration, then EAS build to verify.
+
+
