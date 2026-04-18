@@ -1,8 +1,9 @@
 # Brand Guide
 
 Generated: 2026-04-17
+Updated: 2026-04-18 — Replaced Tailwind config with StyleSheet pattern.
 Project: Odd One Out
-Scope: Minimum viable brand rules for v1. One page, actionable, referenced by Tailwind config and implementation.
+Scope: Minimum viable brand rules for v1. One page, actionable, referenced by `src/lib/colors.ts` and implementation.
 
 ## Icon
 
@@ -48,58 +49,42 @@ These aren't visible in the icon but are needed for UI states:
 
 ## Typography
 
-- **Font family**: System default (San Francisco on iOS, Roboto on Android). No custom fonts in v1.
-- **Weights used**: 400 (regular), 600 (semibold), 700 (bold)
-- **Sizes**: Use Tailwind's default scale. Specifically:
-  - Score display: `text-5xl` or larger, `font-bold`, `text-brand-dark`
-  - Game title (splash): `text-4xl font-bold`
-  - Body / labels: `text-base font-medium text-text-medium`
-  - Small hints: `text-sm text-text-light`
+- **Font family**: System default (Roboto on Android). No custom fonts in v1.
+- **Weights used**: 400 (normal), 600 (600), 700 (bold)
+- **Size scale** (reference values for StyleSheet):
+  - Score display: ~48px, bold, Text Dark
+  - Game title (splash): ~36px, bold
+  - Body / labels: ~16px, weight 500, Text Medium
+  - Small hints: ~14px, Text Light
 
-## Tailwind Config
+## Color Constants File
 
-Add this to `tailwind.config.js` to make the palette available as classnames throughout the app:
+All palette colors live in `src/lib/colors.ts` as named exports. This is the single source of truth for colors in code.
 
-```js
-module.exports = {
-  content: ['./src/**/*.{js,ts,jsx,tsx}'],
-  theme: {
-    extend: {
-      colors: {
-        brand: {
-          blue: '#4889EE',
-          red: '#E4312D',
-          brown: '#C57C45',
-        },
-        bg: {
-          screen: '#FAFAFA',
-          tile: '#FFFFFF',
-          gap: '#F0F0F0',
-        },
-        text: {
-          dark: '#1A1A1A',
-          medium: '#666666',
-          light: '#999999',
-        },
-      },
-    },
-  },
-  plugins: [],
-};
+The file should export a flat object with keys matching the palette names above. Example structure:
+
+```
+colors.brand.blue    → '#4889EE'
+colors.brand.red     → '#E4312D'
+colors.brand.brown   → '#C57C45'
+colors.bg.screen     → '#FAFAFA'
+colors.bg.tile       → '#FFFFFF'
+colors.bg.gap        → '#F0F0F0'
+colors.text.dark     → '#1A1A1A'
+colors.text.medium   → '#666666'
+colors.text.light    → '#999999'
+colors.overlay       → 'rgba(0,0,0,0.6)'
+colors.success       → '#22C55E'
 ```
 
-Usage examples:
-- `className="bg-bg-screen"` for screen background
-- `className="border-2 border-brand-blue rounded-xl"` for the tile grid border
-- `className="text-text-dark font-bold"` for score
-- `className="bg-black/60"` for the game over overlay (Tailwind built-in opacity)
+Usage in components: `style={{ backgroundColor: colors.bg.screen }}` — never inline hex strings.
 
 ## Usage Rules
 
-- **Do** use `brand-blue` as the primary accent. It's the icon's dominant color and ties the app back to the launcher icon.
-- **Do** keep the background off-white (`bg-screen`). Pure white under bright tiles causes eye strain during long runs.
-- **Do** use `text-dark` for anything the player reads during gameplay (score especially). Contrast matters at speed.
-- **Don't** introduce new accent colors without updating this doc. Every ad-hoc color is a future inconsistency.
+- **Do** use `colors.brand.blue` as the primary accent. It's the icon's dominant color and ties the app back to the launcher icon.
+- **Do** keep the background off-white (`colors.bg.screen`). Pure white under bright tiles causes eye strain during long runs.
+- **Do** use `colors.text.dark` for anything the player reads during gameplay (score especially). Contrast matters at speed.
+- **Don't** introduce new accent colors without updating this doc AND `src/lib/colors.ts`. Every ad-hoc color is a future inconsistency.
 - **Don't** use gradients, shadows, or glows in v1. Flat and simple matches the icon style.
 - **Don't** modify the app icon colors. The icon is the source of truth for the palette — change the icon and this doc must be updated in lockstep.
 
@@ -123,6 +108,6 @@ These are post-v1 concerns. Add sections only when actually needed.
 ## Handoff Instruction
 
 When implementing any screen or component:
-1. Use named color classes from this palette via Tailwind (e.g. `bg-brand-blue`), not hex codes inline.
-2. If a needed color isn't in this palette, stop and add it here first with a rationale, don't invent one locally.
+1. Import colors from `src/lib/colors.ts` and use named constants (e.g. `colors.brand.blue`), never inline hex strings.
+2. If a needed color isn't in this palette, stop and add it to this doc AND to `colors.ts` with a rationale, don't invent one locally.
 3. Cross-check component colors against the app icon — they should feel like they belong in the same family.
