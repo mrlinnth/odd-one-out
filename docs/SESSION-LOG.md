@@ -92,4 +92,17 @@ Do not delete old entries. This file is append-only.
 - Wrote Slice 1.5 tasks and Claude Code handoff prompt for the migration session.
 - Next step: run Slice 1.5 in Claude Code to perform the actual migration, then EAS build to verify.
 
+## 2026-04-18 — Slice 1.5 stack migration (Claude Code)
 
+- Removed `nativewind`, `tailwindcss`, `react-native-mmkv` from dependencies.
+- Installed `react-native-reanimated@4.3.0`, `react-native-worklets@0.8.1`, `expo-secure-store@15.0.8`.
+- Deleted `tailwind.config.js`, `global.css`, `nativewind-env.d.ts`.
+- Updated `babel.config.js`: removed `jsxImportSource: 'nativewind'`, swapped plugin to `react-native-worklets/plugin`.
+- Updated `metro.config.js`: removed `withNativeWind` wrapper, now just `getDefaultConfig`.
+- Created `src/lib/colors.ts` with full brand palette from `BRAND.md`.
+- Converted `className` props to `StyleSheet.create` in `src/app/index.tsx` and `src/components/Tile.tsx`.
+- Removed `global.css` import from `src/app/_layout.tsx`.
+- Rewrote `src/stores/gameStore.ts`: dropped Zustand `persist` middleware and MMKV entirely; `highScore` now loaded synchronously at store init via `SecureStore.getItem`, written via exported `saveHighScore()`.
+- `npx tsc --noEmit` passes with zero errors.
+- Committed and pushed to branch `claude/migrate-stack-deps-GTNwq`.
+- Next step: `npx expo prebuild --clean` then EAS build to verify the native compile succeeds and the scrolling grid still works on device.
