@@ -1,42 +1,82 @@
 # Project Constraints
 
 Generated: 2026-04-17
+Updated: 2026-04-18
 Confirmed by developer: yes
 
 ## Project
 
 Don't Tap the White Tile — a React Native Android game. Infinite endless mode: 4-column grid of tiles scrolls upward, player taps black tiles to score. Missing a black tile or tapping a white tile ends the game. Single-player, offline, portrait-only. High score persisted locally.
 
-## Stack & Versions
+## Hard Rules
+- No feature may be added that violates the constraints below without updating this document first.
+- No pre-release packages. A package must have been at its current major version for at least 6 months before being pinned.
+- Pins are set via `npx expo install` where possible, then locked in `package.json`.
 
-| Package / Framework | Version | Notes |
+## Stack
+
+### Runtime
+| Package | Pin | Reason |
 |---|---|---|
-| Expo SDK | 54 | Released Sep 10, 2025. SDK 55 (Feb 2026) skipped per 6-month rule. |
-| React Native | 0.81 | Bundled with Expo 54. |
-| React | 19.1 | Bundled with Expo 54. |
-| TypeScript | 5.9 | Expo 54 template default. Strict mode. |
-| Expo Router | 6.x | File-based routing. Default in SDK 54 template (`src/app/`). |
-| NativeWind | 4.1 | v5 is pre-release — do NOT use. |
-| Tailwind CSS | 3.4 | Required by NativeWind 4.1. Do NOT upgrade to Tailwind v4. |
-| Zustand | 5.0 | For game state. |
-| react-native-mmkv | 3.3.3 | **PIN TO v3.** v4 requires `react-native-nitro-modules` and has open Android build issues on Expo SDK 54 as of Jan 2026. Use API: `new MMKV()` (v3), NOT `createMMKV()` (v4). |
-| react-native-reanimated | 3.x | **PIN TO v3.** NativeWind 4.1 does not support Reanimated v4. Expo SDK 54 defaults to v4 — must explicitly downgrade in `package.json`. |
-| react-native-gesture-handler | ~2.28 | Expo 54 pinned version. |
-| expo-haptics | ~15 (bundled) | Tactile feedback on tap hit, miss, game over. |
+| expo | ~54.0.0 | Current stable SDK |
+| react-native | 0.81.x | Bundled with Expo SDK 54 |
+| react | 19.1.x | Bundled with Expo SDK 54 |
 
-## Critical Version Pinning Rules
+### Animation
+| Package | Pin | Reason |
+|---|---|---|
+| react-native-reanimated | ~4.1.0 | Expo SDK 54 requires exactly 4.1.x; do not bump minor |
+| react-native-worklets | resolved by expo install | Peer dep of Reanimated; let npx expo install resolve |
 
-Two packages deviate from Expo SDK 54's defaults. These must be pinned explicitly in `package.json` BEFORE running `npx expo install --fix`, otherwise Expo's version enforcer will pull incompatible versions:
+Note: Reanimated 4.x requires New Architecture. New Architecture is enabled by default in Expo SDK 54. Do not disable it.
 
-1. `react-native-reanimated`: pin to `~3.x` (not v4). Reason: NativeWind 4.1 incompatibility.
-2. `react-native-mmkv`: pin to `3.3.3` (not v4). Reason: v4 NitroModules build failures on SDK 54 Android.
+Babel config: `babel-preset-expo` automatically handles the Reanimated/Worklets plugin. Do not add `react-native-reanimated/plugin` or `react-native-worklets/plugin` to `babel.config.js` manually.
 
-If Claude Code runs `npx expo install react-native-mmkv` or `npx expo install react-native-reanimated` without checking existing pins, it WILL upgrade to broken versions. Always pass explicit version: `npm install react-native-mmkv@3.3.3 react-native-reanimated@~3.17.0`.
+### Storage
+| Package | Pin | Reason |
+|---|---|---|
+| react-native-mmkv | ~4.3.0 | v4 is a Nitro Module; requires New Architecture |
+| react-native-nitro-modules | ~0.35.0 | Required peer dep of MMKV v4.2+ |
+
+Fallback: if MMKV v4 fails to build on EAS Cloud Build, downgrade to react-native-mmkv ~3.3.0, which has no Nitro dependency and builds cleanly on Expo SDK 54.
+
+### Haptics
+| Package | Pin | Reason |
+|---|---|---|
+| expo-haptics | bundled with SDK 54 | No additional pin needed |
+
+### Styling
+Vanilla `StyleSheet.create` only. No third-party styling libraries.
+
+Color palette is defined in `src/lib/colors.ts` as exported constants. See `BRAND.md`.
+
+### Removed packages (formerly planned, now dropped)
+| Package | Reason removed |
+|---|---|
+| nativewind | Requires Reanimated v3, which does not compile on RN 0.81 |
+| tailwindcss | No longer needed without NativeWind |
+
+### Navigation
+| Package | Pin | Reason |
+|---|---|---|
+| expo-router | ~6.0.0 | Bundled with Expo SDK 54 |
+
+### Build
+- EAS Cloud Build, Android only, development profile
+- Node 20.20.2 on VPS (Debian)
+- `npm` overrides: `"react-dom": "19.1.0"` (resolves peer dep conflict from expo-router transitive pull)
+
+## Platform Constraints
+- Android only
+- Portrait only
+- Light mode only
+- Offline only
+- Single player
 
 ## Language Standards
 
 - **TypeScript**: strict mode ON. No `any`. Explicit return types on exported functions and hooks. Use `type` over `interface` for non-extendable shapes; `interface` for extendable component props.
-- **CSS/Styling**: NativeWind className only. No `StyleSheet.create` except where required by Reanimated `useAnimatedStyle` (which returns style objects, not className strings).
+- **CSS/Styling**: `StyleSheet.create` 
 - **JS**: ES2022+. No CommonJS. Named exports preferred; default export only where Expo Router requires it (route files).
 
 ## Coding Conventions
@@ -68,8 +108,6 @@ If Claude Code runs `npx expo install react-native-mmkv` or `npx expo install re
 
 - No Redux / Redux Toolkit.
 - No AsyncStorage (MMKV replaces it).
-- No Reanimated v4.
-- No NativeWind v5.
 - No `expo-av` (deprecated, removed in SDK 55).
 - No Animated API for the tile scrolling hot path (use Reanimated worklets instead).
 - No iOS-specific code paths or iOS build configuration in v1.
@@ -83,6 +121,4 @@ Before implementing any task, read this file first.
 Apply every constraint in this file to every file you create or modify.
 If a task requires deviating from any constraint, stop and ask before proceeding.
 Do not assume any version, pattern, or convention not listed here.
-
-Pay particular attention to the **Critical Version Pinning Rules** section — those are the two most likely places to get this project stuck in dependency hell.
 
